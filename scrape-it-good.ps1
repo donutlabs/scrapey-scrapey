@@ -1,11 +1,11 @@
 # Base URL for the website
-$baseURL = "https://yourwordpresswebsite.com"
+$baseURL = "https://yourwebsiteurl.com"
 
 # REST API endpoint for media library
 $mediaAPI = "$baseURL/wp-json/wp/v2/media?per_page=100&page="
 
 # Directory to save the images
-$saveDir = "C:\images"
+$saveDir = "C:\moimages"
 
 # Create the directory if it doesn't exist
 if (!(Test-Path -Path $saveDir)) {
@@ -26,8 +26,18 @@ while ($morePages) {
     else {
         foreach ($item in $mediaItems) {
             $imgURL = $item.source_url
+            $filePath = $item.media_details.file
             $fileName = Split-Path -Leaf $imgURL
-            $filePath = Join-Path -Path $saveDir -ChildPath $fileName
+            $fileDir = Split-Path -Parent $filePath
+            $fullDirPath = Join-Path -Path $saveDir -ChildPath $fileDir
+            
+            # Create the directory if it doesn't exist
+            if (!(Test-Path -Path $fullDirPath)) {
+                New-Item -ItemType Directory -Path $fullDirPath
+            }
+
+            # Full path for the image
+            $filePath = Join-Path -Path $fullDirPath -ChildPath $fileName
             
             # Download the image
             Invoke-WebRequest -Uri $imgURL -OutFile $filePath
